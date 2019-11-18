@@ -1,8 +1,57 @@
 import warnings
 
+import numpy as np
 from scipy.interpolate import UnivariateSpline
 from scipy.optimize import curve_fit
-import numpy as np
+
+
+def f_line(x, a, b):
+    """
+    Simple line function, intended for ls regression.
+    """
+    return a * x + b
+
+
+def f_para(x, a, b, c):
+    """
+    Quadratic function, intended for ls regression.
+    """
+    return a * x ** 2 + b * x + c
+
+
+def f_cubic(x, a, b, c, d):
+    """
+    Cubic function, intended for ls regression
+    """
+    return a * x ** 3 + b * x ** 2 + c * x + d
+
+
+def f_exp(x, a, b, c, d):
+    """
+    Exponential function with translation, intended for ls regression.
+    """
+    return a * np.exp(b * (x + c)) + d
+
+
+def f_exp_simple(x, a, b):
+    """
+    Exponential function without translation, intended for ls regression.
+    """
+    return a * np.exp(b * x)
+
+
+def f_gaussian(x, h, mu, sigma, dy):
+    """
+    Gaussian curve. Intended for ls regression.
+    """
+    return h * np.exp(-(x - mu) ** 2 / (2 * sigma ** 2)) + dy
+
+
+def f_sin(x, amp, omega, phi, dy):
+    """
+    Sinus curve. Intended for ls regression.
+    """
+    return amp * np.sin(omega * x + phi) + dy
 
 
 class FitCurve:
