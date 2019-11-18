@@ -6,6 +6,7 @@ setup(
     url='https://github.com/tomasderner97/scireputils.git',
     author='Tomáš Derner',
     packages=['scireputils'],
+    include_package_data=True,
     install_requires=[
         'numpy',
         'matplotlib',
