@@ -1,7 +1,6 @@
 import os
 
 import matplotlib
-
 import matplotlib.pyplot as plt
 
 _MATPLOTLIB_LATEX_STYLE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "latex_style.mplstyle")
