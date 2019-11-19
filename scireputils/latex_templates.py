@@ -23,5 +23,5 @@ def render_template(template_path: str, output_path: str, **variables):
     template = latex_jinja_env.get_template(template_name)
     rendered = template.render(section1='Long Form', section2='Short Form')
 
-    with open(output_path, "w+") as out:
+    with open(output_path, "w+", encoding="utf-8") as out:
         out.write(rendered)
