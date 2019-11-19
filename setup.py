@@ -10,6 +10,6 @@ setup(
     install_requires=[
         'numpy',
         'matplotlib',
-        'pandas', 'scipy'
+        'pandas', 'scipy', 'jinja2'
     ],
 )
