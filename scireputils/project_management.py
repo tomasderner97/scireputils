@@ -21,11 +21,29 @@ _TEMPLATE_STRUCTURE = {
 
 
 def ensure_directory_exists(path):
+    """
+    Checks whether a directory exists and creates it if it doesn't
+
+    Parameters
+    ----------
+    path : str
+        Path of the directory
+
+    """
     if not os.path.isdir(path):
         os.mkdir(path)
 
 
 def init_report_directory(path=""):
+    """
+    Builds a report project directory structure and creates some useful files including the makefile.
+
+    Parameters
+    ----------
+    path : str
+        Path of the project
+
+    """
     if not path:
         path = os.getcwd()
 
