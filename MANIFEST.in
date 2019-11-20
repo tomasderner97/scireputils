@@ -1,2 +1,2 @@
 include scireputils/latex_style.mplstyle
-recursive-include scireputils/report_template/*
+recursive-include scireputils/report_template *
