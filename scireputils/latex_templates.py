@@ -2,6 +2,10 @@ import os
 
 import jinja2
 
+from scireputils._dataframe_to_booktabs_table import _parse_column_property
+from scireputils._dataframe_to_booktabs_table import _make_formater_from_s_col_format_string
+from scireputils._dataframe_to_booktabs_table import _make_column_strings_equal_length
+
 
 def render_template(template_path: str, output_path: str, **variables):
     """
@@ -119,3 +123,84 @@ class Table:
 
     def __init__(self):
         pass
+
+
+def dataframe_to_booktabs_table(df, column_properties, file=None):
+    """
+    Parameters
+    ----------
+    df : pd.DataFrame
+    column_properties : sequence of sequences of size 3 or 4
+        description of columns. The inner sequences should be
+        [
+            name_of_col_in_df,
+            optional_name_of_quantity,
+            optional_unit,
+            optional_S_col_fmt_str
+        ]
+        S column formater examples: 1.2, 4.3e1
+    file : str
+        path to file to save this in. Default is None - no saving
+
+    Returns
+    -------
+    formated table with booktabs in latex code
+    """
+
+    columns = []
+    col_types = []
+
+    for cp in column_properties:
+
+        col_name, quantity_name, unit, s_col_format = _parse_column_property(cp)
+
+        if col_name == "index":
+            from pandas import Series
+            series = Series(df.index.values)
+        else:
+            series = df[col_name]
+        s_column = series.dtype.name != "object"
+
+        if s_column:
+            col_type = f"S[table-format={s_col_format}]"
+            col_types.append(col_type)
+        else:
+            col_types.append("l")
+
+        float_format = _make_formater_from_s_col_format_string(
+            s_col_format
+        ) if s_col_format else None
+
+        col_of_strings = series.to_string(
+            index=False,
+            float_format=float_format
+        ).split("\n")
+
+        if s_column:
+            quantity_name = f"{{{quantity_name}}}"
+            unit = f"{{{unit}}}"
+
+        finished_column_list = _make_column_strings_equal_length(quantity_name, unit, col_of_strings)
+
+        columns.append(finished_column_list)
+
+    rows = zip(*columns)
+    concatenated_rows = [" & ".join(r) + r" \\" for r in rows]
+
+    concatenated_rows[1] += r" \midrule"
+    concatenated_rows[-1] += r" \bottomrule"
+
+    header = [r"\begin{tabular}[t]{"]
+    for ct in col_types:
+        header.append(f"  {ct}")
+    header.append(r"} \toprule")
+
+    footer = [r"\end{tabular}"]
+
+    finished = "\n".join(header + concatenated_rows + footer)
+
+    if file:
+        with open(file, "w+", encoding="utf-8") as f:
+            f.write(finished)
+
+    return finished
