@@ -1,4 +1,5 @@
 import os
+from collections import namedtuple
 
 import jinja2
 
@@ -47,7 +48,7 @@ def render_template(template_path: str, output_path: str, **variables):
         out.write(rendered)
 
 
-def make_figure_float(figure_path, caption, label, position="h", caption_vspace=0):
+def make_figure_float(figure_path, label, caption, position="h", caption_vspace=0):
     """
     Creates a latex code string which includes a figure into the document.
     Result should be used as an argument of the render_template function.
@@ -81,7 +82,7 @@ def make_figure_float(figure_path, caption, label, position="h", caption_vspace=
 """
 
 
-def make_table_float(table_code_path, caption, label, position="h", tabcolsep=15, caption_vspace=0):
+def make_table_float(table_code_path, label, caption, position="h", tabcolsep=15, caption_vspace=0):
     """
     Creates a latex code string which includes a figure into the document.
     Result should be used as an argument of the render_template function.
@@ -117,12 +118,6 @@ def make_table_float(table_code_path, caption, label, position="h", tabcolsep=15
     \\label{{tab:{label}}}
 \\end{{table}}
 """
-
-
-class Table:
-
-    def __init__(self):
-        pass
 
 
 def dataframe_to_booktabs_table(df, column_properties, file=None):
@@ -204,3 +199,31 @@ def dataframe_to_booktabs_table(df, column_properties, file=None):
             f.write(finished)
 
     return finished
+
+
+_Column = namedtuple("Column", "values title unit format_str")
+
+
+class BooktabsTable:
+    TEMPLATE = r"""
+\begin{{tabular}}[t]{{
+{column_definitions}
+}}
+\toprule
+{head}
+\midrule
+{body}
+\bottomrule
+\end{tabular}
+"""
+
+    def __init__(self):
+        self.columns = []
+
+    def add_column(self, values, title="", unit="", format_str="1.1"):
+        self.columns.append(_Column(values, title, unit, format_str))
+
+    def render(self, file_path):
+        latex = self.TEMPLATE.format(column_definitions="", head="", body="")
+        with open(file_path, "w")as f:
+            f.write(latex)
