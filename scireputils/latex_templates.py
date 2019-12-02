@@ -82,15 +82,21 @@ def make_figure_float(figure_path, label, caption, position="h", caption_vspace=
 """
 
 
-def make_table_float(table_code_path, label, caption, position="h", tabcolsep=15, caption_vspace=0):
+def make_table_float(tabular_code,
+                     label,
+                     caption,
+                     position="h",
+                     tabcolsep=15,
+                     caption_vspace=0,
+                     external_table=False):
     """
     Creates a latex code string which includes a figure into the document.
     Result should be used as an argument of the render_template function.
 
     Parameters
     ----------
-    table_code_path : str
-        Path to the table tex file, relative to the latex document
+    tabular_code : str
+        Code of the table of path to the table tex file, relative to the latex document, depending on external_table
         Used for
     caption : str
         Table caption
@@ -102,17 +108,31 @@ def make_table_float(table_code_path, label, caption, position="h", tabcolsep=15
         Separation distance between columns
     caption_vspace : int
         Adjusts the spacing between the figure and the caption, in pts
+    external_table : bool
+        Is the table_code a link to external table?
 
     Returns
     -------
     Generated latex code
 
     """
-    return f"""
+    if external_table:
+        return f"""
 \\begin{{table}}[{position}]
     \\centering
     \\setlength{{\\tabcolsep}}{{{tabcolsep}pt}}
-    \\input{{{table_code_path}}}
+    \\input{{{tabular_code}}}
+    \\vspace{{{caption_vspace}pt}}
+    \\caption{{{caption}}}
+    \\label{{tab:{label}}}
+\\end{{table}}
+"""
+    else:
+        return f"""
+\\begin{{table}}[{position}]
+    \\centering
+    \\setlength{{\\tabcolsep}}{{{tabcolsep}pt}}
+    {tabular_code}
     \\vspace{{{caption_vspace}pt}}
     \\caption{{{caption}}}
     \\label{{tab:{label}}}
