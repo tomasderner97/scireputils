@@ -1,4 +1,5 @@
 import os
+import subprocess
 from collections import namedtuple
 
 import jinja2
@@ -6,6 +7,23 @@ import jinja2
 from scireputils._dataframe_to_booktabs_table import _parse_column_property
 from scireputils._dataframe_to_booktabs_table import _make_formater_from_s_col_format_string
 from scireputils._dataframe_to_booktabs_table import _make_column_strings_equal_length
+
+
+LATEX_COMMAND = [
+    "pdflatex",
+    "-file-line-error",
+    "-interaction=nonstopmode",
+    "-synctex=1",
+    "-output-format=pdf",
+    "-output-directory=../output",
+    "-aux-directory=../auxiliary",
+    "-include-directory=../classfiles",
+    "-include-directory=../latex",  # TODO think about keeping paths in project_wide.py
+]
+
+OPEN_PDF_COMMAND = [
+    "sumatrapdf",
+]
 
 
 def render_template(template_path: str, output_path: str, **variables):
@@ -46,6 +64,17 @@ def render_template(template_path: str, output_path: str, **variables):
 
     with open(output_path, "w+", encoding="utf-8") as out:
         out.write(rendered)
+
+
+def compile_latex_to_pdf(latex_path, pdf_path):
+    latex_dir, latex_name = os.path.split(latex_path)
+
+    if os.path.isdir(pdf_path):
+        latex_name_wo_ext = os.path.splitext(latex_name)[0]
+        pdf_path = os.path.join(pdf_path, latex_name_wo_ext + ".pdf")
+
+    subprocess.run(LATEX_COMMAND + [latex_path])
+    subprocess.run(OPEN_PDF_COMMAND + [pdf_path])
 
 
 def make_figure_float(figure_path, label, caption, position="h", caption_vspace=0):
@@ -237,7 +266,7 @@ class BooktabsTable:
 \end{tabular}
 """
 
-    def __init__(self):
+    def __init__(self, label, caption, position="h", caption_vspace=0):
         self.columns = []
 
     def add_column(self, values, title="", unit="", format_str="1.1"):
