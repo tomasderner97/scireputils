@@ -2,7 +2,7 @@ import glob
 import os
 import shutil
 
-import report_template.paths as paths
+import .report_template.paths as paths
 
 _FILE_DIR = os.path.split(__file__)[0]
 _PROJECT_TEMPLATE_PATH = os.path.join(_FILE_DIR, "report_template")
