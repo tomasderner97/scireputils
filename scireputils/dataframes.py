@@ -1,7 +1,12 @@
 import pandas as pd
 
 
-def dataframe_from_csv(csv_path: str, index_col=None, sep=r"\s*,\s*", **kwargs):
+def dataframe_from_csv(csv_path: str,
+                       index_col=None,
+                       sep=r"\s*,\s*",
+                       header=0,
+                       names=None,
+                       **kwargs):
     """
     Creates Pandas dataframe from comma separated values file, allows # comments and
     blank lines.
@@ -13,4 +18,6 @@ def dataframe_from_csv(csv_path: str, index_col=None, sep=r"\s*,\s*", **kwargs):
                        skip_blank_lines=True,
                        index_col=index_col,
                        comment="#",
+                       header=header,
+                       names=names,
                        **kwargs)

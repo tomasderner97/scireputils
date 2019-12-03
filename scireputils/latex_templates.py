@@ -9,7 +9,7 @@ from scireputils._dataframe_to_booktabs_table import _make_formater_from_s_col_f
 from scireputils._dataframe_to_booktabs_table import _make_column_strings_equal_length
 
 
-LATEX_COMMAND = [
+_LATEX_COMMAND = [
     "pdflatex",
     "-file-line-error",
     "-interaction=nonstopmode",
@@ -21,7 +21,7 @@ LATEX_COMMAND = [
     "-include-directory=../latex",  # TODO think about keeping paths in project_wide.py
 ]
 
-OPEN_PDF_COMMAND = [
+_OPEN_PDF_COMMAND = [
     "sumatrapdf",
 ]
 
@@ -67,14 +67,24 @@ def render_template(template_path: str, output_path: str, **variables):
 
 
 def compile_latex_to_pdf(latex_path, pdf_path):
+    """
+    Compiles given latex file to pdf using pdflatex. Then opens the final pdf.
+    Parameters
+    ----------
+    latex_path : str
+        path to the latex .tex file
+    pdf_path : str
+        path to the resulting .pdf file or output directory (the name will be the same as the .tex file)
+
+    """
     latex_dir, latex_name = os.path.split(latex_path)
 
     if os.path.isdir(pdf_path):
         latex_name_wo_ext = os.path.splitext(latex_name)[0]
         pdf_path = os.path.join(pdf_path, latex_name_wo_ext + ".pdf")
 
-    subprocess.run(LATEX_COMMAND + [latex_path])
-    subprocess.run(OPEN_PDF_COMMAND + [pdf_path])
+    subprocess.run(_LATEX_COMMAND + [latex_path])
+    subprocess.run(_OPEN_PDF_COMMAND + [pdf_path])
 
 
 def make_figure_float(figure_path, label, caption, position="h", caption_vspace=0):
