@@ -12,4 +12,9 @@ setup(
         'matplotlib',
         'pandas', 'scipy', 'jinja2'
     ],
+    entry_points={
+        "console_scripts": [
+            "scirep-init-report = scireputils.project_management:init_report_directory_executable",
+        ],
+    },
 )

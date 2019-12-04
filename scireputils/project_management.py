@@ -1,6 +1,7 @@
 import glob
 import os
 import shutil
+import sys
 
 _FILE_DIR = os.path.split(__file__)[0]
 _PROJECT_TEMPLATE_PATH = os.path.join(_FILE_DIR, "report_template")
@@ -52,3 +53,10 @@ def init_report_directory(path=""):
 
         for file in files:
             shutil.copy(os.path.join(_PROJECT_TEMPLATE_PATH, file), dir_path)
+
+
+def init_report_directory_executable():
+    if len(sys.argv) > 1:
+        init_report_directory(sys.argv[1])
+    else:
+        init_report_directory()

@@ -3,11 +3,11 @@ import subprocess
 from collections import namedtuple
 
 import jinja2
+import numpy as np
 
-from scireputils._dataframe_to_booktabs_table import _parse_column_property
-from scireputils._dataframe_to_booktabs_table import _make_formater_from_s_col_format_string
 from scireputils._dataframe_to_booktabs_table import _make_column_strings_equal_length
-
+from scireputils._dataframe_to_booktabs_table import _make_formater_from_s_col_format_string
+from scireputils._dataframe_to_booktabs_table import _parse_column_property
 
 _LATEX_COMMAND = [
     "pdflatex",
@@ -261,10 +261,11 @@ def dataframe_to_booktabs_table(df, column_properties, file=None):
 
 
 _Column = namedtuple("Column", "values title unit format_str")
+_SEPARATOR = "-"
 
 
 class BooktabsTable:
-    TEMPLATE = r"""
+    TABULAR_TEMPLATE = r"""
 \begin{{tabular}}[t]{{
 {column_definitions}
 }}
@@ -276,13 +277,106 @@ class BooktabsTable:
 \end{tabular}
 """
 
-    def __init__(self, label, caption, position="h", caption_vspace=0):
+    def __init__(self,
+                 label,
+                 caption,
+                 position="h",
+                 tabcolsep=15,
+                 caption_vspace=0,
+                 toprule_pos=None,
+                 midrule_pos=None,
+                 bottomrule_pos=None):
+        """
+        Represents a latex booktabs table.
+
+        Parameters
+        ----------
+        label : str
+            Table label without tab:, that is added automatically
+        caption : str
+            Table caption
+        position : str
+            The float position argument, such as 'h', 'b'...
+        tabcolsep : int
+            Separation distance between columns
+        caption_vspace : int
+            Adjusts the spacing between the figure and the caption, in pts
+        toprule_pos : list, default [0,]
+            Indices of rows over which toprule should be drawn
+        midrule_pos : list, default [2,]
+            Indices of rows over which midrule should be drawn
+        bottomrule_pos : list, default [inf,]
+            Indices of rows over which bottomrule should be drawn (inf means under last row)
+
+        """
         self.columns = []
+        self.label = label
+        self.caption = caption
+        self.position = position
+        self.tabcolsep = tabcolsep
+        self.caption_vspace = caption_vspace
+        self.toprule_pos = toprule_pos or [0, ]
+        self.midrule_pos = midrule_pos or [2, ]
+        self.bottomrule_pos = bottomrule_pos or [np.inf, ]
 
     def add_column(self, values, title="", unit="", format_str="1.1"):
         self.columns.append(_Column(values, title, unit, format_str))
 
-    def render(self, file_path):
-        latex = self.TEMPLATE.format(column_definitions="", head="", body="")
+    def add_separator(self):
+        self.columns.append(_SEPARATOR)
+
+    def render(self):
+        """
+        Compiles the columns into a formatted tabular environment code and wraps it in a table environment.
+
+        Returns
+        -------
+        Latex code for the table ready to be included in compilable .tex file
+        """
+        tabular = self._render_tabular()
+        return f"""
+        \\begin{{table}}[{self.position}]
+            \\centering
+            \\setlength{{\\tabcolsep}}{{{self.tabcolsep}pt}}
+            {tabular}
+            \\vspace{{{self.caption_vspace}pt}}
+            \\caption{{{self.caption}}}
+            \\label{{tab:{self.label}}}
+        \\end{{table}}
+        """
+
+    def render_standalone(self, file_path, input_path):
+        """
+        Compiles the columns into a formatted tabular environment code and saves the code into a file.
+        Then inputs the file into a table environment.
+
+        Parameters
+        ----------
+        file_path : str
+            Path to the tabular file relative to the python script
+        input_path : str
+            Path to the tabular file relative to the compilable latex file (the one that is compiled into .pdf)
+
+        Returns
+        -------
+        Latex code of table environment wrapping input of external table file
+
+        """
+        tabular = self._render_tabular()
         with open(file_path, "w")as f:
-            f.write(latex)
+            f.write(tabular)
+
+        return f"""
+        \\begin{{table}}[{self.position}]
+            \\centering
+            \\setlength{{\\tabcolsep}}{{{self.tabcolsep}pt}}
+            \\input{{{input_path}}}
+            \\vspace{{{self.caption_vspace}pt}}
+            \\caption{{{self.caption}}}
+            \\label{{tab:{self.label}}}
+        \\end{{table}}
+        """
+
+    def _render_tabular(self):
+        latex = self.TABULAR_TEMPLATE.format(column_definitions="", head="", body="")
+        return latex
