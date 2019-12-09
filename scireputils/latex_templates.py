@@ -282,10 +282,10 @@ class BooktabsTable:
                  caption,
                  position="h",
                  tabcolsep=15,
-                 caption_vspace=0,
-                 toprule_pos=None,
-                 midrule_pos=None,
-                 bottomrule_pos=None):
+                 caption_vspace=0,):
+                 # toprule_pos=None,
+                 # midrule_pos=None,
+                 # bottomrule_pos=None):
         """
         Represents a latex booktabs table.
 
@@ -315,15 +315,15 @@ class BooktabsTable:
         self.position = position
         self.tabcolsep = tabcolsep
         self.caption_vspace = caption_vspace
-        self.toprule_pos = toprule_pos or [0, ]
-        self.midrule_pos = midrule_pos or [2, ]
-        self.bottomrule_pos = bottomrule_pos or [np.inf, ]
+        # self.toprule_pos = toprule_pos or [0, ]
+        # self.midrule_pos = midrule_pos or [2, ]
+        # self.bottomrule_pos = bottomrule_pos or [np.inf, ]
 
     def add_column(self, values, title="", unit="", format_str="1.1"):
         self.columns.append(_Column(values, title, unit, format_str))
 
-    def add_separator(self):
-        self.columns.append(_SEPARATOR)
+    # def add_separator(self):
+    #     self.columns.append(_SEPARATOR)
 
     def render(self):
         """
@@ -378,5 +378,17 @@ class BooktabsTable:
         """
 
     def _render_tabular(self):
-        latex = self.TABULAR_TEMPLATE.format(column_definitions="", head="", body="")
-        return latex
+        """
+        This is a terrible hack using the function I had before to do the heavy lifting of actual table generation.
+        I need to rewrite this.
+        """
+        column_dict = {}
+        column_properties = []
+
+        for i, col in enumerate(self.columns):
+            column_dict[str(i)] = col.values
+            column_properties = (str(i), col.title, col.unit, col.format_str)
+
+        return dataframe_to_booktabs_table(column_dict, column_properties)
+
+
