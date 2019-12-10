@@ -124,7 +124,7 @@ def make_figure_float(figure_path, label, caption, position="h", caption_vspace=
     elif scale:
         parameters = f"[scale={scale}]"
     elif includegraphics_params:
-        parameters = includegraphics_params
+        parameters = f"[{includegraphics_params}]"
 
     return f"""
 \\begin{{figure}}[{position}]
