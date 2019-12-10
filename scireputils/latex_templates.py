@@ -88,7 +88,8 @@ def compile_latex_to_pdf(latex_path, pdf_path):
     subprocess.run(_OPEN_PDF_COMMAND + [pdf_path])
 
 
-def make_figure_float(figure_path, label, caption, position="h", caption_vspace=0, width=None, scale=None):
+def make_figure_float(figure_path, label, caption, position="h", caption_vspace=0, width=None, scale=None,
+                      includegraphics_params=None):
     """
     Creates a latex code string which includes a figure into the document.
     Result should be used as an argument of the render_template function.
@@ -106,9 +107,11 @@ def make_figure_float(figure_path, label, caption, position="h", caption_vspace=
     caption_vspace : int
         Adjusts the spacing between the figure and the caption, in pts
     width : str
-        Width of the figure
+        Width of the figure, is mutually exclusive with scale and includegraphics_params
     scale : str
-        Scale of the figure
+        Scale of the figure, is mutually exclusive with width and includegraphics_params
+    includegraphics_params : str
+        Other includegraphics parameters, is mutually exclusive with scale and width
 
     Returns
     -------
@@ -120,6 +123,8 @@ def make_figure_float(figure_path, label, caption, position="h", caption_vspace=
         parameters = f"[width={width}]"
     elif scale:
         parameters = f"[scale={scale}]"
+    elif includegraphics_params:
+        parameters = includegraphics_params
 
     return f"""
 \\begin{{figure}}[{position}]
