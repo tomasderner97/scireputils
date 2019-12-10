@@ -124,7 +124,7 @@ def make_figure_float(figure_path, label, caption, position="h", caption_vspace=
     return f"""
 \\begin{{figure}}[{position}]
     \\centering
-    \\includegraphics{{{parameters}}}{{{figure_path}}}
+    \\includegraphics{parameters}{{{figure_path}}}
     \\vspace{{{caption_vspace}pt}}
     \\caption{{{caption}}}
     \\label{{fig:{label}}}
