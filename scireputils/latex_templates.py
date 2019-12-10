@@ -4,6 +4,7 @@ from collections import namedtuple
 
 import jinja2
 import numpy as np
+from pandas import DataFrame
 
 from scireputils._dataframe_to_booktabs_table import _make_column_strings_equal_length
 from scireputils._dataframe_to_booktabs_table import _make_formater_from_s_col_format_string
@@ -87,7 +88,7 @@ def compile_latex_to_pdf(latex_path, pdf_path):
     subprocess.run(_OPEN_PDF_COMMAND + [pdf_path])
 
 
-def make_figure_float(figure_path, label, caption, position="h", caption_vspace=0):
+def make_figure_float(figure_path, label, caption, position="h", caption_vspace=0, width=None, scale=None):
     """
     Creates a latex code string which includes a figure into the document.
     Result should be used as an argument of the render_template function.
@@ -104,16 +105,26 @@ def make_figure_float(figure_path, label, caption, position="h", caption_vspace=
         The float position argument, such as 'h', 'b'...
     caption_vspace : int
         Adjusts the spacing between the figure and the caption, in pts
+    width : str
+        Width of the figure
+    scale : str
+        Scale of the figure
 
     Returns
     -------
     Generated latex code
 
     """
+    parameters = ""
+    if width:
+        parameters = f"[width={width}]"
+    elif scale:
+        parameters = f"[scale={scale}]"
+
     return f"""
 \\begin{{figure}}[{position}]
     \\centering
-    \\includegraphics{{{figure_path}}}
+    \\includegraphics{{{parameters}}}{{{figure_path}}}
     \\vspace{{{caption_vspace}pt}}
     \\caption{{{caption}}}
     \\label{{fig:{label}}}
@@ -387,8 +398,8 @@ class BooktabsTable:
 
         for i, col in enumerate(self.columns):
             column_dict[str(i)] = col.values
-            column_properties = (str(i), col.title, col.unit, col.format_str)
+            column_properties.append((str(i), col.title, col.unit, col.format_str))
 
-        return dataframe_to_booktabs_table(column_dict, column_properties)
+        return dataframe_to_booktabs_table(DataFrame(column_dict), column_properties)
 
 
